@@ -14,7 +14,7 @@ function extractTarball(sourceFile, destination, callback) {
   } else {
     // This file is not gzipped, just deflate it.
     fs.createReadStream(sourceFile)
-    .pipe(tar.Extract({ path: destination}))
+    .pipe(new tar.Unpack({ path: destination}))
     .on('error', function(er) { callback(er)})
     .on("end", function() { callback(null)})
   }
