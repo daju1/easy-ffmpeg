@@ -8,7 +8,7 @@ function extractTarball(sourceFile, destination, callback) {
     // This file is gzipped, use zlib to deflate the stream before passing to tar.
     fs.createReadStream(sourceFile)
     .pipe(zlib.createGunzip())
-    .pipe(tar.Unpack({ path: destination}))
+    .pipe(new tar.Unpack({ path: destination}))
     .on('error', function(er) { callback(er)})
     .on("end", function() { callback(null)})
   } else {
