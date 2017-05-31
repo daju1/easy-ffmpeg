@@ -1,6 +1,26 @@
-var tarball = require('tarball-extract')
-var request = require('request')
 var fs = require('fs')
+ , tar = require('tar')
+ , zlib = require('zlib')
+ , wget = require('wget')
+
+function extractTarball(sourceFile, destination, callback) {
+  if( /(gz|tgz)$/i.test(sourceFile)) {
+    // This file is gzipped, use zlib to deflate the stream before passing to tar.
+    fs.createReadStream(sourceFile)
+    .pipe(zlib.createGunzip())
+    .pipe(tar.Unpack({ path: destination}))
+    .on('error', function(er) { callback(er)})
+    .on("end", function() { callback(null)})
+  } else {
+    // This file is not gzipped, just deflate it.
+    fs.createReadStream(sourceFile)
+    .pipe(tar.Extract({ path: destination}))
+    .on('error', function(er) { callback(er)})
+    .on("end", function() { callback(null)})
+  }
+}
+
+var request = require('request')
 var path = require('path');
 
 var user = 'konsumer'
@@ -29,7 +49,7 @@ function downloader () {
     })
     .pipe(fs.createWriteStream(pkg))
     .on('close', function () {
-      tarball.extractTarball(pkg, binDir, function (err, result) {
+      extractTarball(pkg, binDir, function (err, result) {
         if (err) {
           throw err
         }
